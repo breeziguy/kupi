@@ -1,0 +1,10 @@
+{
+  "name": "razzy",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:bot": "npm run dev --workspace=apps/bot",
+    "dev:convex": "npx convex dev"
+  }
+}
