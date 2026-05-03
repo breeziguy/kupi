@@ -25,7 +25,9 @@ export default defineSchema({
     redFlagsCount: v.number(),
     greenFlagsCount: v.number(),
     lastUpdated: v.number(),
-  }).index("by_userId", ["userId"]),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_userId_lastUpdated", ["userId", "lastUpdated"]),
 
   analyses: defineTable({
     chatFolderId: v.id("chatFolders"),

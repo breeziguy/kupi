@@ -7,7 +7,7 @@ export default function SuccessContent() {
   const name = params.get("name") ?? "there";
   const kupiPhone = process.env.NEXT_PUBLIC_KUPI_PHONE ?? "";
 
-  const deepLink = `sms:${kupiPhone}&body=Hey%20KUPI!`;
+  const deepLink = `sms:${kupiPhone};body=Hey%20KUPI!`;
 
   return (
     <main style={{ padding: "40px 20px", maxWidth: "600px", margin: "0 auto", textAlign: "center" }}>

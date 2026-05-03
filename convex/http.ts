@@ -18,7 +18,19 @@ http.route({
     const signature = request.headers.get("webhook-signature") ?? "";
     const expected = createHmac("sha256", secret).update(body).digest("hex");
 
-    if (signature !== `sha256=${expected}`) {
+    const sigBuf = Buffer.from(signature);
+    const expBuf = Buffer.from(`sha256=${expected}`);
+    const isValid =
+      sigBuf.length === expBuf.length &&
+      (() => {
+        // constant-time comparison polyfill (works in V8 isolates)
+        let diff = 0;
+        for (let i = 0; i < sigBuf.length; i++) {
+          diff |= sigBuf[i] ^ expBuf[i];
+        }
+        return diff === 0;
+      })();
+    if (!isValid) {
       return new Response("Invalid signature", { status: 401 });
     }
 

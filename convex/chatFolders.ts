@@ -19,7 +19,7 @@ export const listByUser = query({
   handler: async (ctx, { userId }) => {
     return await ctx.db
       .query("chatFolders")
-      .withIndex("by_userId", q => q.eq("userId", userId))
+      .withIndex("by_userId_lastUpdated", q => q.eq("userId", userId))
       .order("desc")
       .collect();
   },

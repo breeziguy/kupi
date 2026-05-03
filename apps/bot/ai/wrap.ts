@@ -41,7 +41,13 @@ Return JSON: { "summary": "...", "verdict": "..." }. Return ONLY valid JSON.`,
   });
 
   const content = response.choices[0].message.content ?? "{}";
-  const parsed = JSON.parse(content);
+  let parsed: Record<string, unknown> = {};
+  try {
+    const clean = content.replace(/^```[a-z]*\n?/m, "").replace(/```$/m, "").trim();
+    parsed = JSON.parse(clean);
+  } catch {
+    // malformed response — return defaults below
+  }
 
   return {
     summary: parsed.summary ?? "",

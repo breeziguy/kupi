@@ -18,7 +18,14 @@ export async function checkBilling(
 ): Promise<boolean> {
   if (user.plan !== "trial") {
     const sub = await getSubscription(user._id as any);
-    if (sub && sub.status === "active") return true;
+    // No sub row yet (webhook lag) → trust the plan field
+    if (!sub) return true;
+    if (sub.status === "active") return true;
+    // Subscription exists but is not active
+    await space.send(
+      `Hey ${user.name}, your subscription is no longer active 🔒\n\nRenew here: ${POLAR_CHECKOUT_URL}`
+    );
+    return false;
   }
 
   if (user.plan === "trial" && Date.now() < user.trialEndsAt) {

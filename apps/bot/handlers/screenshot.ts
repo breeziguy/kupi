@@ -22,7 +22,8 @@ export async function handleScreenshot(
 
   await space.responding(async () => {
     const imageBuffer = message.content.data as Buffer;
-    const extracted = await extractScreenshot(imageBuffer);
+    const mimeType = (message.content as any).mimeType ?? "image/jpeg";
+    const extracted = await extractScreenshot(imageBuffer, mimeType);
     let totalTokens = extracted.tokensUsed;
 
     const folder = await findOrCreateFolder(

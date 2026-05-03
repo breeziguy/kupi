@@ -9,7 +9,8 @@ export interface ExtractedScreenshot {
 }
 
 export async function extractScreenshot(
-  imageBuffer: Buffer
+  imageBuffer: Buffer,
+  mimeType = "image/jpeg"
 ): Promise<ExtractedScreenshot> {
   const base64 = imageBuffer.toString("base64");
 
@@ -31,7 +32,7 @@ Return ONLY valid JSON, no markdown.`,
           },
           {
             type: "image_url",
-            image_url: { url: `data:image/jpeg;base64,${base64}` },
+            image_url: { url: `data:${mimeType};base64,${base64}` },
           },
         ],
       },
@@ -39,7 +40,14 @@ Return ONLY valid JSON, no markdown.`,
   });
 
   const content = response.choices[0].message.content ?? "{}";
-  const parsed = JSON.parse(content);
+  let parsed: Record<string, unknown> = {};
+  try {
+    // strip markdown code fences if present
+    const clean = content.replace(/^```[a-z]*\n?/m, "").replace(/```$/m, "").trim();
+    parsed = JSON.parse(clean);
+  } catch {
+    // malformed response — return defaults below
+  }
 
   return {
     personName: parsed.personName ?? "Unknown",
