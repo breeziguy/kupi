@@ -13,7 +13,8 @@ export async function onMessage(space: Space, message: Message): Promise<void> {
     return;
   }
 
-  const phone = message.sender.id;
+  const phone = message.sender?.id;
+  if (!phone) return;
   const user = await getUserByPhone(phone);
 
   if (!user) {

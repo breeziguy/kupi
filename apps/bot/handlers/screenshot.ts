@@ -18,11 +18,10 @@ export async function handleScreenshot(
   message: Message,
   user: ScreenshotUser
 ): Promise<void> {
-  if (message.content.type !== "attachment") return;
-
   await space.responding(async () => {
-    const imageBuffer = message.content.data as Buffer;
-    const mimeType = (message.content as any).mimeType ?? "image/jpeg";
+    if (message.content.type !== "attachment") return;
+    const imageBuffer = await message.content.read();
+    const mimeType = message.content.mimeType ?? "image/jpeg";
     const extracted = await extractScreenshot(imageBuffer, mimeType);
     let totalTokens = extracted.tokensUsed;
 

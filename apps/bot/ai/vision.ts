@@ -40,7 +40,7 @@ Return ONLY valid JSON, no markdown.`,
   });
 
   const content = response.choices[0].message.content ?? "{}";
-  let parsed: Record<string, unknown> = {};
+  let parsed: any = {};
   try {
     // strip markdown code fences if present
     const clean = content.replace(/^```[a-z]*\n?/m, "").replace(/```$/m, "").trim();

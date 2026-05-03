@@ -7,15 +7,13 @@ import { onMessage } from "./handlers/onMessage.js";
 
 const isLocal = process.env.NODE_ENV === "development";
 
-const spectrumConfig = isLocal
-  ? { providers: [getTerminalProvider()] }
-  : {
+const app = isLocal
+  ? await Spectrum({ providers: [getTerminalProvider()] })
+  : await Spectrum({
       projectId: process.env.SPECTRUM_PROJECT_ID!,
       projectSecret: process.env.SPECTRUM_PROJECT_SECRET!,
       providers: [getIMessageProvider()],
-    };
-
-const app = await Spectrum(spectrumConfig);
+    });
 
 console.log(`${isLocal ? "Terminal" : "iMessage"} bot running — ${config.wingmanName} is live`);
 

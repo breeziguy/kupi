@@ -37,7 +37,7 @@ ${input.previousContext ? `Context about ${input.personName}: ${input.previousCo
   });
 
   const content = response.choices[0].message.content ?? "{}";
-  let parsed: Record<string, unknown> = {};
+  let parsed: any = {};
   try {
     const clean = content.replace(/^```[a-z]*\n?/m, "").replace(/```$/m, "").trim();
     parsed = JSON.parse(clean);

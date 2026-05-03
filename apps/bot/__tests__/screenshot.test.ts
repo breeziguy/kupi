@@ -71,7 +71,7 @@ describe("handleScreenshot", () => {
 
   it("extracts screenshot, generates replies, and sends them", async () => {
     const msg = {
-      content: { type: "attachment", data: Buffer.from("img"), mimeType: "image/jpeg", name: "ss.jpg" },
+      content: { type: "attachment", read: async () => Buffer.from("img"), mimeType: "image/jpeg", name: "ss.jpg" },
     } as any;
     await handleScreenshot(mockSpace, msg, { _id: "u1", name: "Jake", gender: "male" });
 
@@ -90,7 +90,7 @@ describe("handleScreenshot", () => {
     });
 
     const msg = {
-      content: { type: "attachment", data: Buffer.from("img"), mimeType: "image/jpeg", name: "ss.jpg" },
+      content: { type: "attachment", read: async () => Buffer.from("img"), mimeType: "image/jpeg", name: "ss.jpg" },
     } as any;
     await handleScreenshot(mockSpace, msg, { _id: "u1", name: "Jake", gender: "male" });
 

@@ -1,7 +1,35 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { api } from "./_generated/api";
-import { createHmac } from "crypto";
+
+async function verifyHmac(
+  secret: string,
+  body: string,
+  signature: string
+): Promise<boolean> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const sigBytes = await crypto.subtle.sign("HMAC", key, enc.encode(body));
+  const expected =
+    "sha256=" +
+    Array.from(new Uint8Array(sigBytes))
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+
+  // constant-time comparison
+  if (expected.length !== signature.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) {
+    diff |= expected.charCodeAt(i) ^ signature.charCodeAt(i);
+  }
+  return diff === 0;
+}
 
 const http = httpRouter();
 
@@ -16,20 +44,7 @@ http.route({
 
     const body = await request.text();
     const signature = request.headers.get("webhook-signature") ?? "";
-    const expected = createHmac("sha256", secret).update(body).digest("hex");
-
-    const sigBuf = Buffer.from(signature);
-    const expBuf = Buffer.from(`sha256=${expected}`);
-    const isValid =
-      sigBuf.length === expBuf.length &&
-      (() => {
-        // constant-time comparison polyfill (works in V8 isolates)
-        let diff = 0;
-        for (let i = 0; i < sigBuf.length; i++) {
-          diff |= sigBuf[i] ^ expBuf[i];
-        }
-        return diff === 0;
-      })();
+    const isValid = await verifyHmac(secret, body, signature);
     if (!isValid) {
       return new Response("Invalid signature", { status: 401 });
     }
