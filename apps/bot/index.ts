@@ -30,20 +30,30 @@ console.log(`${isLocal ? "Terminal" : "iMessage"} bot running — ${config.wingm
 console.log("[debug] Waiting for messages...");
 const seenMessageIds = new Set<string>();
 
-for await (const [space, message] of app.messages) {
-  if (seenMessageIds.has(message.id)) {
-    console.log("[debug] Skipping duplicate message:", message.id);
-    continue;
-  }
+// Heartbeat — proves the process is alive every 60s
+setInterval(() => console.log("[heartbeat] bot alive, stream listening"), 60_000);
 
-  seenMessageIds.add(message.id);
-  if (seenMessageIds.size > 2000) {
-    const oldestMessageId = seenMessageIds.values().next().value;
-    if (oldestMessageId) seenMessageIds.delete(oldestMessageId);
-  }
+try {
+  for await (const [space, message] of app.messages) {
+    if (seenMessageIds.has(message.id)) {
+      console.log("[debug] Skipping duplicate message:", message.id);
+      continue;
+    }
 
-  console.log("[debug] Message received from:", message.sender?.id, "type:", message.content.type);
-  onMessage(space, message).catch(err => {
-    console.error("Error handling message:", err);
-  });
+    seenMessageIds.add(message.id);
+    if (seenMessageIds.size > 2000) {
+      const oldestMessageId = seenMessageIds.values().next().value;
+      if (oldestMessageId) seenMessageIds.delete(oldestMessageId);
+    }
+
+    console.log("[debug] Message received from:", message.sender?.id, "type:", message.content.type);
+    onMessage(space, message).catch(err => {
+      console.error("Error handling message:", err);
+    });
+  }
+  console.error("[error] message stream ended unexpectedly — exiting");
+  process.exit(1);
+} catch (err) {
+  console.error("[error] message stream threw:", err);
+  process.exit(1);
 }
