@@ -25,6 +25,13 @@ export const listByUser = query({
   },
 });
 
+export const getById = query({
+  args: { folderId: v.id("chatFolders") },
+  handler: async (ctx, { folderId }) => {
+    return await ctx.db.get(folderId);
+  },
+});
+
 export const create = mutation({
   args: {
     userId: v.id("users"),

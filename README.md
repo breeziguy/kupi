@@ -57,7 +57,7 @@ Required variables:
 | `POLAR_CHECKOUT_URL` | `apps/bot/.env` | Your Polar.sh checkout link |
 | `WEB_URL` | `apps/bot/.env` | Your deployed web URL |
 | `NEXT_PUBLIC_CONVEX_URL` | `apps/web/.env.local` | Same as CONVEX_URL |
-| `NEXT_PUBLIC_KUPI_PHONE` | `apps/web/.env.local` | KUPI's iMessage phone number |
+| `NEXT_PUBLIC_PHOTON_IMESSAGE_PHONE` | `apps/web/.env.local` | Photon Codes iMessage phone number for KUPI |
 | `POLAR_WEBHOOK_SECRET` | Convex dashboard env vars | From Polar.sh webhook settings |
 
 ### 5. Run locally
@@ -96,7 +96,7 @@ cd apps/bot && npx vitest run
 
 1. Import this repo to Vercel
 2. Set root directory to `apps/web`
-3. Add web env vars (`NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_KUPI_PHONE`)
+3. Add web env vars (`NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_PHOTON_IMESSAGE_PHONE`)
 
 ### Convex → Production
 

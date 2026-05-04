@@ -1,8 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const server_1 = require("convex/server");
-const server_2 = require("./_generated/server");
-const api_1 = require("./_generated/api");
+import { httpRouter } from "convex/server";
+import { httpAction } from "./_generated/server";
+import { api } from "./_generated/api";
 async function verifyHmac(secret, body, signature) {
     const enc = new TextEncoder();
     const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
@@ -20,11 +18,11 @@ async function verifyHmac(secret, body, signature) {
     }
     return diff === 0;
 }
-const http = (0, server_1.httpRouter)();
+const http = httpRouter();
 http.route({
     path: "/webhooks/polar",
     method: "POST",
-    handler: (0, server_2.httpAction)(async (ctx, request) => {
+    handler: httpAction(async (ctx, request) => {
         const secret = process.env.POLAR_WEBHOOK_SECRET;
         if (!secret) {
             return new Response("Webhook secret not configured", { status: 500 });
@@ -42,10 +40,10 @@ http.route({
             const phone = customer.metadata?.phone;
             if (!phone)
                 return new Response("No phone in metadata", { status: 400 });
-            const user = await ctx.runQuery(api_1.api.users.getByPhone, { phone });
+            const user = await ctx.runQuery(api.users.getByPhone, { phone });
             if (!user)
                 return new Response("User not found", { status: 404 });
-            await ctx.runMutation(api_1.api.subscriptions.upsert, {
+            await ctx.runMutation(api.subscriptions.upsert, {
                 userId: user._id,
                 polarCustomerId: customer.id,
                 polarSubscriptionId: subscription.id,
@@ -57,4 +55,4 @@ http.route({
         return new Response("OK", { status: 200 });
     }),
 });
-exports.default = http;
+export default http;

@@ -1,4 +1,5 @@
 import type { Space, Message } from "spectrum-ts";
+import { effect, imessage } from "spectrum-ts/providers/imessage";
 import { getUserByPhone } from "../convex/users.js";
 import { checkBilling } from "./billing.js";
 import { handleScreenshot } from "./screenshot.js";
@@ -19,8 +20,10 @@ export async function onMessage(space: Space, message: Message): Promise<void> {
 
   if (!user) {
     await space.send(
-      `Hey! I'm ${config.wingmanName}, your iMessage wingman 🔥\n\n` +
-        `Sign up to get started: ${process.env.WEB_URL ?? "https://kupi.app"}`
+      effect(
+        `Hey! I'm ${config.wingmanName}, your iMessage wingman 🔥\n\nSign up to get started: ${process.env.WEB_URL ?? "https://kupi.app"}`,
+        imessage.effect.message.celebration
+      )
     );
     return;
   }

@@ -1,27 +1,37 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.onboard = exports.updatePlan = exports.create = exports.getByPhone = void 0;
-const server_1 = require("./_generated/server");
-const values_1 = require("convex/values");
-exports.getByPhone = (0, server_1.query)({
-    args: { phone: values_1.v.string() },
+import { mutation, query } from "./_generated/server";
+import { v } from "convex/values";
+function normalisePhone(phone) {
+    const compact = phone.replace(/[\s\-().]/g, "");
+    const digits = compact.replace(/\D/g, "");
+    if (compact.startsWith("+"))
+        return `+${digits}`;
+    if (digits.length === 10)
+        return `+1${digits}`;
+    if (digits.length === 11 && digits.startsWith("1"))
+        return `+${digits}`;
+    return compact;
+}
+export const getByPhone = query({
+    args: { phone: v.string() },
     handler: async (ctx, { phone }) => {
+        const normalised = normalisePhone(phone);
         return await ctx.db
             .query("users")
-            .withIndex("by_phone", q => q.eq("phone", phone))
+            .withIndex("by_phone", q => q.eq("phone", normalised))
             .first();
     },
 });
-exports.create = (0, server_1.mutation)({
+export const create = mutation({
     args: {
-        name: values_1.v.string(),
-        gender: values_1.v.string(),
-        phone: values_1.v.string(),
+        name: v.string(),
+        gender: v.string(),
+        phone: v.string(),
     },
     handler: async (ctx, { name, gender, phone }) => {
+        const normalised = normalisePhone(phone);
         const existing = await ctx.db
             .query("users")
-            .withIndex("by_phone", q => q.eq("phone", phone))
+            .withIndex("by_phone", q => q.eq("phone", normalised))
             .first();
         if (existing)
             return existing._id;
@@ -29,30 +39,30 @@ exports.create = (0, server_1.mutation)({
         return await ctx.db.insert("users", {
             name,
             gender,
-            phone,
+            phone: normalised,
             plan: "trial",
             trialEndsAt,
             createdAt: Date.now(),
         });
     },
 });
-exports.updatePlan = (0, server_1.mutation)({
+export const updatePlan = mutation({
     args: {
-        userId: values_1.v.id("users"),
-        plan: values_1.v.union(values_1.v.literal("trial"), values_1.v.literal("basic"), values_1.v.literal("pro")),
+        userId: v.id("users"),
+        plan: v.union(v.literal("trial"), v.literal("basic"), v.literal("pro")),
     },
     handler: async (ctx, { userId, plan }) => {
         await ctx.db.patch(userId, { plan });
     },
 });
-exports.onboard = (0, server_1.mutation)({
+export const onboard = mutation({
     args: {
-        name: values_1.v.string(),
-        gender: values_1.v.string(),
-        phone: values_1.v.string(),
+        name: v.string(),
+        gender: v.string(),
+        phone: v.string(),
     },
     handler: async (ctx, { name, gender, phone }) => {
-        const normalised = phone.replace(/[\s\-\(\)]/g, "");
+        const normalised = normalisePhone(phone);
         const existing = await ctx.db
             .query("users")
             .withIndex("by_phone", q => q.eq("phone", normalised))

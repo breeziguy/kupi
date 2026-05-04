@@ -6,6 +6,7 @@ const mockAnalyzeConversation = vi.fn();
 const mockFindOrCreateFolder = vi.fn();
 const mockUpdateFolder = vi.fn();
 const mockLogTokens = vi.fn();
+const mockConvexMutation = vi.fn();
 
 vi.mock("../ai/vision.js", () => ({ extractScreenshot: mockExtractScreenshot }));
 vi.mock("../ai/reply.js", () => ({ generateReplies: mockGenerateReplies }));
@@ -15,7 +16,7 @@ vi.mock("../convex/chatFolders.js", () => ({
   updateFolder: mockUpdateFolder,
 }));
 vi.mock("../convex/tokenUsage.js", () => ({ logTokens: mockLogTokens }));
-vi.mock("../convex/client.js", () => ({ convex: {} }));
+vi.mock("../convex/client.js", () => ({ convex: { mutation: mockConvexMutation } }));
 
 const mockSpaceSend = vi.fn();
 const mockSpace = {
@@ -43,6 +44,7 @@ describe("handleScreenshot", () => {
     mockFindOrCreateFolder.mockResolvedValue(mockFolder);
     mockUpdateFolder.mockResolvedValue(undefined);
     mockLogTokens.mockResolvedValue(undefined);
+    mockConvexMutation.mockResolvedValue(undefined);
 
     mockExtractScreenshot.mockResolvedValue({
       personName: "Lisa",
@@ -77,6 +79,10 @@ describe("handleScreenshot", () => {
 
     expect(mockExtractScreenshot).toHaveBeenCalled();
     expect(mockGenerateReplies).toHaveBeenCalled();
+    expect(mockConvexMutation).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ type: "rizz_report" })
+    );
     expect(mockSpaceSend).toHaveBeenCalledWith(expect.stringContaining("Lisa"));
   });
 
@@ -94,6 +100,6 @@ describe("handleScreenshot", () => {
     } as any;
     await handleScreenshot(mockSpace, msg, { _id: "u1", name: "Jake", gender: "male" });
 
-    expect(mockSpaceSend).toHaveBeenCalledWith(expect.stringContaining("🚩"));
+    expect(mockSpaceSend).toHaveBeenCalledWith(expect.stringContaining("Tiny caution"));
   });
 });

@@ -19,9 +19,11 @@ export async function generateReplies(input: ReplyInput): Promise<ReplyResult> {
     .map(m => `${m.sender === "me" ? input.userName : input.personName}: ${m.text}`)
     .join("\n");
 
-  const systemPrompt = `You are ${config.wingmanName}, a sharp and authentic dating wingman for ${input.userName} (${input.userGender}).
-Your job is to suggest real, natural replies — not generic pickup lines.
-Match the tone of the conversation. Be confident, playful, and human.
+  const systemPrompt = `You are ${config.wingmanName}, a sharp dating wingman texting with ${input.userName} (${input.userGender}).
+Suggest replies that sound like a real person wrote them in iMessage.
+No pickup-line voice, no therapy voice, no "as an AI" energy.
+Match the conversation's pace: if they are dry, keep it light; if they are warm, lean in.
+Each reply should be short enough to text, specific to what they said, and a little confident without sounding try-hard.
 ${input.previousContext ? `Context about ${input.personName}: ${input.previousContext}` : ""}`;
 
   const response = await openai.chat.completions.create({

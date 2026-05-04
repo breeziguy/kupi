@@ -1,15 +1,12 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.listByFolder = exports.create = void 0;
-const server_1 = require("./_generated/server");
-const values_1 = require("convex/values");
-exports.create = (0, server_1.mutation)({
+import { mutation, query } from "./_generated/server";
+import { v } from "convex/values";
+export const create = mutation({
     args: {
-        chatFolderId: values_1.v.id("chatFolders"),
-        userId: values_1.v.id("users"),
-        type: values_1.v.string(),
-        result: values_1.v.any(),
-        tokensUsed: values_1.v.number(),
+        chatFolderId: v.id("chatFolders"),
+        userId: v.id("users"),
+        type: v.string(),
+        result: v.any(),
+        tokensUsed: v.number(),
     },
     handler: async (ctx, args) => {
         return await ctx.db.insert("analyses", {
@@ -18,8 +15,8 @@ exports.create = (0, server_1.mutation)({
         });
     },
 });
-exports.listByFolder = (0, server_1.query)({
-    args: { chatFolderId: values_1.v.id("chatFolders") },
+export const listByFolder = query({
+    args: { chatFolderId: v.id("chatFolders") },
     handler: async (ctx, { chatFolderId }) => {
         return await ctx.db
             .query("analyses")

@@ -1,10 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.update = exports.create = exports.listByUser = exports.findByUserAndName = void 0;
-const server_1 = require("./_generated/server");
-const values_1 = require("convex/values");
-exports.findByUserAndName = (0, server_1.query)({
-    args: { userId: values_1.v.id("users"), personName: values_1.v.string() },
+import { mutation, query } from "./_generated/server";
+import { v } from "convex/values";
+export const findByUserAndName = query({
+    args: { userId: v.id("users"), personName: v.string() },
     handler: async (ctx, { userId, personName }) => {
         const folders = await ctx.db
             .query("chatFolders")
@@ -13,8 +10,8 @@ exports.findByUserAndName = (0, server_1.query)({
         return folders.find(f => f.personName.toLowerCase() === personName.toLowerCase()) ?? null;
     },
 });
-exports.listByUser = (0, server_1.query)({
-    args: { userId: values_1.v.id("users") },
+export const listByUser = query({
+    args: { userId: v.id("users") },
     handler: async (ctx, { userId }) => {
         return await ctx.db
             .query("chatFolders")
@@ -23,11 +20,17 @@ exports.listByUser = (0, server_1.query)({
             .collect();
     },
 });
-exports.create = (0, server_1.mutation)({
+export const getById = query({
+    args: { folderId: v.id("chatFolders") },
+    handler: async (ctx, { folderId }) => {
+        return await ctx.db.get(folderId);
+    },
+});
+export const create = mutation({
     args: {
-        userId: values_1.v.id("users"),
-        personName: values_1.v.string(),
-        platform: values_1.v.string(),
+        userId: v.id("users"),
+        personName: v.string(),
+        platform: v.string(),
     },
     handler: async (ctx, { userId, personName, platform }) => {
         return await ctx.db.insert("chatFolders", {
@@ -43,14 +46,14 @@ exports.create = (0, server_1.mutation)({
         });
     },
 });
-exports.update = (0, server_1.mutation)({
+export const update = mutation({
     args: {
-        folderId: values_1.v.id("chatFolders"),
-        messageCount: values_1.v.optional(values_1.v.number()),
-        interestLevel: values_1.v.optional(values_1.v.number()),
-        compatibilityScore: values_1.v.optional(values_1.v.number()),
-        redFlagsCount: values_1.v.optional(values_1.v.number()),
-        greenFlagsCount: values_1.v.optional(values_1.v.number()),
+        folderId: v.id("chatFolders"),
+        messageCount: v.optional(v.number()),
+        interestLevel: v.optional(v.number()),
+        compatibilityScore: v.optional(v.number()),
+        redFlagsCount: v.optional(v.number()),
+        greenFlagsCount: v.optional(v.number()),
     },
     handler: async (ctx, { folderId, ...fields }) => {
         const patch = { lastUpdated: Date.now() };

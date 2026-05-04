@@ -1,10 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.upsert = exports.getByUser = void 0;
-const server_1 = require("./_generated/server");
-const values_1 = require("convex/values");
-exports.getByUser = (0, server_1.query)({
-    args: { userId: values_1.v.id("users") },
+import { mutation, query } from "./_generated/server";
+import { v } from "convex/values";
+export const getByUser = query({
+    args: { userId: v.id("users") },
     handler: async (ctx, { userId }) => {
         return await ctx.db
             .query("subscriptions")
@@ -12,14 +9,14 @@ exports.getByUser = (0, server_1.query)({
             .first();
     },
 });
-exports.upsert = (0, server_1.mutation)({
+export const upsert = mutation({
     args: {
-        userId: values_1.v.id("users"),
-        polarCustomerId: values_1.v.string(),
-        polarSubscriptionId: values_1.v.string(),
-        plan: values_1.v.string(),
-        status: values_1.v.string(),
-        currentPeriodEnd: values_1.v.number(),
+        userId: v.id("users"),
+        polarCustomerId: v.string(),
+        polarSubscriptionId: v.string(),
+        plan: v.string(),
+        status: v.string(),
+        currentPeriodEnd: v.number(),
     },
     handler: async (ctx, args) => {
         const existing = await ctx.db

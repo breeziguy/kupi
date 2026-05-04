@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
-import { api } from "../../convex/_generated/api";
+import { api } from "@/convex/_generated/api";
 
 export default function OnboardForm() {
   const [name, setName] = useState("");
@@ -16,36 +16,46 @@ export default function OnboardForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!name.trim() || !gender || !phone.trim()) {
+      setError("Please fill in all fields to continue.");
+      return;
+    }
     setLoading(true);
     setError("");
-
     try {
-      await onboard({ name, gender, phone });
+      await onboard({ name: name.trim(), gender, phone: phone.trim() });
+      const photonResponse = await fetch("/api/photon/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), phone: phone.trim() }),
+      });
+      const photon = await photonResponse.json();
+      if (!photonResponse.ok) throw new Error(photon.error ?? "Photon setup failed");
       router.push(
-        `/onboard/success?name=${encodeURIComponent(name)}`
+        `/onboard/success?name=${encodeURIComponent(name.trim())}&redirectUrl=${encodeURIComponent(photon.redirectUrl)}&assignedPhone=${encodeURIComponent(photon.assignedPhoneNumber ?? "")}`
       );
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "400px" }}>
+    <form noValidate onSubmit={handleSubmit} className="form-wrap">
       <input
         type="text"
         placeholder="Your first name"
         value={name}
         onChange={e => setName(e.target.value)}
         required
-        style={{ padding: "10px", fontSize: "16px", borderRadius: "8px", border: "1px solid #ccc", width: "100%", boxSizing: "border-box" as const }}
+        className="form-input"
       />
       <select
         value={gender}
         onChange={e => setGender(e.target.value)}
         required
-        style={{ padding: "10px", fontSize: "16px", borderRadius: "8px", border: "1px solid #ccc", width: "100%", boxSizing: "border-box" as const }}
+        className="form-select"
       >
         <option value="">Who are you?</option>
         <option value="male">Male</option>
@@ -58,14 +68,10 @@ export default function OnboardForm() {
         value={phone}
         onChange={e => setPhone(e.target.value)}
         required
-        style={{ padding: "10px", fontSize: "16px", borderRadius: "8px", border: "1px solid #ccc", width: "100%", boxSizing: "border-box" as const }}
+        className="form-input"
       />
-      {error && <p style={{ color: "red", margin: 0 }}>{error}</p>}
-      <button
-        type="submit"
-        disabled={loading}
-        style={{ padding: "12px", fontSize: "16px", borderRadius: "8px", backgroundColor: "#000", color: "#fff", border: "none", cursor: loading ? "wait" : "pointer" }}
-      >
+      {error && <p className="form-error">{error}</p>}
+      <button type="submit" disabled={loading} className="form-btn">
         {loading ? "Getting you set up..." : "Get Started Free →"}
       </button>
     </form>

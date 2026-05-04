@@ -1,14 +1,11 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getForMonth = exports.log = void 0;
-const server_1 = require("./_generated/server");
-const values_1 = require("convex/values");
+import { mutation, query } from "./_generated/server";
+import { v } from "convex/values";
 function currentMonth() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
-exports.log = (0, server_1.mutation)({
-    args: { userId: values_1.v.id("users"), tokensUsed: values_1.v.number() },
+export const log = mutation({
+    args: { userId: v.id("users"), tokensUsed: v.number() },
     handler: async (ctx, { userId, tokensUsed }) => {
         const month = currentMonth();
         const existing = await ctx.db
@@ -30,8 +27,8 @@ exports.log = (0, server_1.mutation)({
         }
     },
 });
-exports.getForMonth = (0, server_1.query)({
-    args: { userId: values_1.v.id("users") },
+export const getForMonth = query({
+    args: { userId: v.id("users") },
     handler: async (ctx, { userId }) => {
         const month = currentMonth();
         return await ctx.db

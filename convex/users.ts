@@ -1,12 +1,24 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
+function normalisePhone(phone: string) {
+  const compact = phone.replace(/[\s\-().]/g, "");
+  const digits = compact.replace(/\D/g, "");
+
+  if (compact.startsWith("+")) return `+${digits}`;
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+
+  return compact;
+}
+
 export const getByPhone = query({
   args: { phone: v.string() },
   handler: async (ctx, { phone }) => {
+    const normalised = normalisePhone(phone);
     return await ctx.db
       .query("users")
-      .withIndex("by_phone", q => q.eq("phone", phone))
+      .withIndex("by_phone", q => q.eq("phone", normalised))
       .first();
   },
 });
@@ -18,9 +30,10 @@ export const create = mutation({
     phone: v.string(),
   },
   handler: async (ctx, { name, gender, phone }) => {
+    const normalised = normalisePhone(phone);
     const existing = await ctx.db
       .query("users")
-      .withIndex("by_phone", q => q.eq("phone", phone))
+      .withIndex("by_phone", q => q.eq("phone", normalised))
       .first();
     if (existing) return existing._id;
 
@@ -28,7 +41,7 @@ export const create = mutation({
     return await ctx.db.insert("users", {
       name,
       gender,
-      phone,
+      phone: normalised,
       plan: "trial",
       trialEndsAt,
       createdAt: Date.now(),
@@ -53,7 +66,7 @@ export const onboard = mutation({
     phone: v.string(),
   },
   handler: async (ctx, { name, gender, phone }) => {
-    const normalised = phone.replace(/[\s\-\(\)]/g, "");
+    const normalised = normalisePhone(phone);
 
     const existing = await ctx.db
       .query("users")
